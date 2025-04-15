@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+Console.WriteLine("🔌 Connection String: " + configuration.GetConnectionString("DefaultConnection"));
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
