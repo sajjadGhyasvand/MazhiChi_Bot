@@ -55,10 +55,34 @@ RecurringJob.AddOrUpdate<ScraperService>(
     "0 9 * * *"
 );
 
+// 🔁 اجرای ارسال پیام هر ۳۰ دقیقه
 RecurringJob.AddOrUpdate<InstagramService>(
     "send-messages-every-30-minutes",
     x => x.SendMessagesToUnmessagedUsersAsync(1), // فقط یک پیام در هر ۳۰ دقیقه
     "*/30 * * * *"
 );
 
+// بررسی دیتابیس و اجرای Scrape در صورت نیاز
+await RunInitialScrapeIfNeeded(app);
+
+// اجرای اپلیکیشن
 app.Run();
+
+// متد بررسی و اسکرپ اولیه
+static async Task RunInitialScrapeIfNeeded(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var scraperService = scope.ServiceProvider.GetRequiredService<ScraperService>();
+
+    // بررسی اگر دیتابیس خالی بود
+    if (!dbContext.TargetUsers.Any())
+    {
+        Console.WriteLine("📥 دیتابیس خالیه، در حال اسکرپ اولیه...");
+        await scraperService.ScrapeFollowers("baboone_.store");
+    }
+    else
+    {
+        Console.WriteLine("✅ دیتابیس از قبل پر شده، Scrape فقط طبق برنامه زمان‌بندی انجام میشه.");
+    }
+}
