@@ -4,8 +4,6 @@ using InstagramApiSharp;
 using InstagramApiSharp.API;
 using InstagramApiSharp.API.Builder;
 using InstagramApiSharp.Classes;
-using InstagramBot.Data;
-using InstagramBot.Services;
 using MazhiChi.Data;
 using MazhiChi.Services;
 using Microsoft.AspNetCore.Builder;
