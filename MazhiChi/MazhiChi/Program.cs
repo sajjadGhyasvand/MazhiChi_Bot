@@ -79,12 +79,12 @@ using (var scope = app.Services.CreateScope())
 
     if (!db.TargetUsers.Any())
     {
-        Console.WriteLine("🔍 دیتابیس خالی است. اجرای Scraper برای پر کردن لیست...");
+        Console.WriteLine("🔍 DataBase is Empty");
         await scraper.ScrapeFollowers("ranginkamon");
     }
     else
     {
-        Console.WriteLine("✅ دیتابیس از قبل دارای اطلاعات است.");
+        Console.WriteLine("✅ DataBase Has Data");
     }
 }
 

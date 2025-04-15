@@ -30,7 +30,7 @@ namespace MazhiChi.Services
             var now = DateTime.Now;
             if (now.Hour < 8 || now.Hour >= 24)
             {
-                Console.WriteLine("⏸️ خارج از بازه مجاز است.");
+                Console.WriteLine("⏸️ Out Of Context.");
                 await Task.Delay(TimeSpan.FromMinutes(30));
                 return;
             }
@@ -53,7 +53,7 @@ namespace MazhiChi.Services
                 var userResult = await _instaApi.UserProcessor.GetUserAsync(user.Username);
                 if (!userResult.Succeeded)
                 {
-                    Console.WriteLine($"❌ عدم موفقیت در گرفتن اطلاعات کاربر: {user.Username}");
+                    Console.WriteLine($"❌ Get Data is Failed: {user.Username}");
                     continue;
                 }
 
@@ -75,18 +75,18 @@ namespace MazhiChi.Services
                     await _dbContext.SaveChangesAsync();
                     sent++;
 
-                    Console.WriteLine($"✅ پیام به {user.Username} ارسال شد.");
+                    Console.WriteLine($"✅  {user.Username} send to.");
 
                     var delay = new Random().Next(120, 300); // تاخیر بین ۲ تا ۵ دقیقه
                     await Task.Delay(TimeSpan.FromSeconds(delay));
                 }
                 else
                 {
-                    Console.WriteLine($"❌ ارسال پیام به {user.Username} ناموفق بود.");
+                    Console.WriteLine($"❌ ا,esaage send failed{user.Username}  .");
                 }
             }
 
-            Console.WriteLine($"🎯 پیام‌های امروز ({sent}) ارسال شد.");
+            Console.WriteLine($"🎯Today send  ({sent}) message.");
         }
 
     }
