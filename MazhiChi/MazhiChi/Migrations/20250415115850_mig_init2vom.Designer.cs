@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MazhiChi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250411090525_Init")]
-    partial class Init
+    [Migration("20250415115850_mig_init2vom")]
+    partial class mig_init2vom
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace MazhiChi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MazhiChi.Models.UserProfile", b =>
+            modelBuilder.Entity("MazhiChi.Models.TargetUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,15 +33,21 @@ namespace MazhiChi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("FollowDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("FollowersCount")
+                        .HasColumnType("integer");
 
-                    b.Property<bool>("IsFollowedBack")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserId")
+                    b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsMessaged")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("MessagedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -49,7 +55,7 @@ namespace MazhiChi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("TargetUsers");
                 });
 #pragma warning restore 612, 618
         }

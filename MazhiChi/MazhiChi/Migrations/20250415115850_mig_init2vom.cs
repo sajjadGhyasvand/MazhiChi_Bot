@@ -7,25 +7,27 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MazhiChi.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class mig_init2vom : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "TargetUsers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    FollowDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsFollowedBack = table.Column<bool>(type: "boolean", nullable: false)
+                    FullName = table.Column<string>(type: "text", nullable: false),
+                    IsPrivate = table.Column<bool>(type: "boolean", nullable: false),
+                    FollowersCount = table.Column<int>(type: "integer", nullable: false),
+                    IsMessaged = table.Column<bool>(type: "boolean", nullable: false),
+                    MessagedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_TargetUsers", x => x.Id);
                 });
         }
 
@@ -33,7 +35,7 @@ namespace MazhiChi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "TargetUsers");
         }
     }
 }

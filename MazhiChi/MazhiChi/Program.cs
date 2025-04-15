@@ -1,20 +1,49 @@
-﻿using MazhiChi.Scheduler;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using InstagramApiSharp;
+using InstagramApiSharp.API;
+using InstagramApiSharp.API.Builder;
+using InstagramApiSharp.Classes;
+using MazhiChi.Data;
 using MazhiChi.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-var username = "یوزرنیم اینستا";
-var password = "پسورد اینستا";
-var targetUsername = "پیج هدف";
+var builder = WebApplication.CreateBuilder(args);
 
-var instaService = new InstagramService(username, password);
-var success = await instaService.LoginAsync();
+// تنظیمات DB
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-if (!success)
+// Hangfire
+builder.Services.AddHangfire(config => config.UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
+
+// InstagramApiSharp باید اینجا تنظیم بشه
+builder.Services.AddSingleton<IInstaApi>(sp =>
 {
-    Console.WriteLine("Login Failed");
-    return;
-}
+    var api = InstaApiBuilder.CreateBuilder().SetUser(new UserSessionData
+    {
+        UserName = "mazhi_chi",
+        Password = "148635"
+    }).Build();
+    return api;
+});
 
-var scheduler = new FollowScheduler(instaService);
-await scheduler.ScrapeAndFollowAsync(targetUsername);
+// سرویس‌ها
+builder.Services.AddScoped<InstagramService>();
+builder.Services.AddScoped<ScraperService>();
 
-Console.WriteLine("Done!");
+var app = builder.Build();
+
+app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<InstagramService>(
+    "send-daily-messages",
+    x => x.SendMessagesToUnmessagedUsersAsync(30),
+    "*/10 * * * *"
+);
+
+app.Run();

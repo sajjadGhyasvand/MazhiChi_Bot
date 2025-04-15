@@ -10,11 +10,8 @@ namespace MazhiChi.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public DbSet<UserProfile> Users { get; set; }
+        public DbSet<TargetUser> TargetUsers { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=78.135.89.34;Port=5432;Database=instabot;Username=mazhichi_user;Password=1374@Sajjad@1374");
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
     }
 }
