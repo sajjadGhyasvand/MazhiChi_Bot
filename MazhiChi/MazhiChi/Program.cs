@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 Console.WriteLine("🔌 Connection String: " + configuration.GetConnectionString("DefaultConnection"));
-
+Console.WriteLine("📁 Base Directory: " + Directory.GetCurrentDirectory());
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
