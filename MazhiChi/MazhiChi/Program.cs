@@ -23,11 +23,6 @@ using Microsoft.Extensions.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-
-// چاپ Connection String و Base Directory جهت اطمینان از مقداردهی درست
-Console.WriteLine("🔌 Connection String: " + configuration.GetConnectionString("DefaultConnection"));
-Console.WriteLine("📁 Base Directory: " + Directory.GetCurrentDirectory());
-
 // تنظیم DbContext با استفاده از PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
@@ -110,10 +105,6 @@ RecurringJob.AddOrUpdate<InstagramService>(
 //    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
 //);
 
-/*RecurringJob.AddOrUpdate(
-    "test-job",
-    () => Console.WriteLine($"📬 Test Job Run at: {DateTime.Now}"),
-    "20 3 * * *"  // معادل ۷:۵۰ صبح ایران
-);*/
+
 
 app.Run();
