@@ -74,6 +74,10 @@ namespace MazhiChi.Services
                 {
                     // Attach user to the context to make sure it's tracked
                     _dbContext.TargetUsers.Attach(user);
+                    if (string.IsNullOrEmpty(user.FullName))
+                    {
+                        user.FullName = string.Empty;
+                    }
                     user.IsMessaged = true;
                     user.MessagedAt = DateTime.Now;
 

@@ -75,6 +75,12 @@ var app = builder.Build();
 // داشبورد Hangfire
 app.UseHangfireDashboard();
 
+RecurringJob.AddOrUpdate<InstagramService>(
+    "send-messages-every-1-minute",
+    x => x.SendMessagesToUnmessagedUsersAsync(),
+    "* * * * *"  // اجرای هر 1 دقیقه یک‌بار
+);
+
 // بررسی دیتابیس و انجام Scrape اولیه در صورت خالی بودن
 /*using (var scope = app.Services.CreateScope())
 {
@@ -103,11 +109,7 @@ app.UseHangfireDashboard();
 //    x => x.SendMessagesToUnmessagedUsersAsync(),
 //    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
 //);
-RecurringJob.AddOrUpdate<InstagramService>(
-    "send-messages-every-1-minute",
-    x => x.SendMessagesToUnmessagedUsersAsync(),
-    "* * * * *"  // اجرای هر 1 دقیقه یک‌بار
-);
+
 /*RecurringJob.AddOrUpdate(
     "test-job",
     () => Console.WriteLine($"📬 Test Job Run at: {DateTime.Now}"),
