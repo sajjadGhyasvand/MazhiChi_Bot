@@ -105,6 +105,12 @@ RecurringJob.AddOrUpdate<InstagramService>(
     "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
 );
 
+//RecurringJob.AddOrUpdate<InstagramService>(
+//    "send-messages-every-30-minutes",
+//    x => x.SendMessagesToUnmessagedUsersAsync(),
+//    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
+//);
+
 
 
 app.Run();
