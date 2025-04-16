@@ -79,7 +79,7 @@ namespace MazhiChi.Services
                         user.FullName = string.Empty;
                     }
                     user.IsMessaged = true;
-                    user.MessagedAt = DateTime.Now;
+                    user.MessagedAt = DateTime.UtcNow;
 
                     try
                     {
