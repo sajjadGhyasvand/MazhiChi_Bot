@@ -125,7 +125,8 @@ namespace MazhiChi.Services
 
                 _dbContext.TargetUsers.Add(new TargetUser
                 {
-                    Username = follower.UserName
+                    Username = follower.UserName,
+                    FullName = follower.UserName,
                 });
 
                 Console.WriteLine($"Added {follower.UserName} to TargetUsers.");
