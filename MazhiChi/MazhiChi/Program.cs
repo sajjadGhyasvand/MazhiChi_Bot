@@ -68,8 +68,8 @@ builder.Services.AddScoped<ScraperService>();
 var app = builder.Build();
 
 // داشبورد Hangfire
-app.UseHangfireDashboard();
-
+/*app.UseHangfireDashboard();*/
+app.UseHangfireDashboard("/hangfire");
 //RecurringJob.AddOrUpdate<InstagramService>(
 //    "send-messages-every-1-minute",
 //    x => x.SendMessagesToUnmessagedUsersAsync(),
