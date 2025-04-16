@@ -89,6 +89,10 @@ namespace MazhiChi.Services
                     catch (Exception ex)
                     {
                         Console.WriteLine($"❗ DB update error for {user.Username}: {ex.Message}");
+                        if (ex.InnerException != null)
+                        {
+                            Console.WriteLine($"🔎 Inner exception: {ex.InnerException.Message}");
+                        }
                     }
 
                 }
