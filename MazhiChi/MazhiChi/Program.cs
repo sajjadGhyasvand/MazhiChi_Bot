@@ -76,7 +76,7 @@ var app = builder.Build();
 app.UseHangfireDashboard();
 
 // بررسی دیتابیس و انجام Scrape اولیه در صورت خالی بودن
-using (var scope = app.Services.CreateScope())
+/*using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var scraper = scope.ServiceProvider.GetRequiredService<ScraperService>();
@@ -90,24 +90,28 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine("✅ DataBase Has Data");
     }
-}
+}*/
 
-RecurringJob.AddOrUpdate<ScraperService>(
+/*RecurringJob.AddOrUpdate<ScraperService>(
     "scrape-followers-daily",
     x => x.ScrapeFollowers("ranginkamon"),
     "30 5 * * *"    // معادل ۹ صبح ایران
-);
+);*/
 
+//RecurringJob.AddOrUpdate<InstagramService>(
+//    "send-messages-every-30-minutes",
+//    x => x.SendMessagesToUnmessagedUsersAsync(),
+//    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
+//);
 RecurringJob.AddOrUpdate<InstagramService>(
-    "send-messages-every-30-minutes",
-    x => x.SendMessagesToUnmessagedUsersAsync(1),
-    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
+    "send-messages-every-1-minute",
+    x => x.SendMessagesToUnmessagedUsersAsync(),
+    "* * * * *"  // اجرای هر 1 دقیقه یک‌بار
 );
-
-RecurringJob.AddOrUpdate(
+/*RecurringJob.AddOrUpdate(
     "test-job",
     () => Console.WriteLine($"📬 Test Job Run at: {DateTime.Now}"),
     "20 3 * * *"  // معادل ۷:۵۰ صبح ایران
-);
+);*/
 
 app.Run();

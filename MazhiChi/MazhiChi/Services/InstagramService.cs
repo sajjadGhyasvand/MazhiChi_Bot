@@ -1,16 +1,11 @@
-﻿using InstagramApiSharp.API.Builder;
-using InstagramApiSharp.API;
+﻿using InstagramApiSharp.API;
 using InstagramApiSharp.Classes;
-using InstagramApiSharp.Logger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InstagramApiSharp;
 using MazhiChi.Data;
-using MazhiChi.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MazhiChi.Services
 {
@@ -18,6 +13,7 @@ namespace MazhiChi.Services
     {
         private readonly IInstaApi _instaApi;
         private readonly ApplicationDbContext _dbContext;
+        private static readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
         public InstagramService(IInstaApi instaApi, ApplicationDbContext dbContext)
         {
@@ -25,75 +21,79 @@ namespace MazhiChi.Services
             _dbContext = dbContext;
         }
 
-        public async Task SendMessagesToUnmessagedUsersAsync(int dailyLimit)
+        public async Task SendMessagesToUnmessagedUsersAsync()
         {
-            var now = DateTime.UtcNow;
-            var iranStart = new TimeSpan(4, 30, 0);  // 08:00 IR
-            var iranEnd = new TimeSpan(20, 30, 0);   // 00:00 IR
-
-            if (now.TimeOfDay < iranStart || now.TimeOfDay > iranEnd)
+            if (!await _lock.WaitAsync(0))
             {
-                Console.WriteLine("⏸️ Out Of Context.");
-                await Task.Delay(TimeSpan.FromMinutes(30));
+                Console.WriteLine("⚠️ Job already running. Skipping...");
                 return;
             }
 
-            var usersToMessage = await _dbContext.TargetUsers
-                .Where(u => !u.IsMessaged)
-                .OrderBy(u => u.Id)
-                .Take(dailyLimit)
-                .ToListAsync();
-
-            int sent = 0;
-
-            foreach (var user in usersToMessage)
+            try
             {
-                now = DateTime.UtcNow;
-                iranStart = new TimeSpan(4, 30, 0);  // 08:00 IR
-                iranEnd = new TimeSpan(20, 30, 0);   // 00:00 IR
-                if (now.TimeOfDay < iranStart || now.TimeOfDay > iranEnd)
-                    break;
+                var now = DateTime.UtcNow;
+                var iranStart = new TimeSpan(4, 30, 0);  // 08:00 IR
+                var iranEnd = new TimeSpan(20, 30, 0);   // 00:00 IR
 
-                // دریافت اطلاعات کاربر برای گرفتن userId
+                if (now.TimeOfDay < iranStart || now.TimeOfDay > iranEnd)
+                {
+                    Console.WriteLine("⏸️ Out of messaging hours.");
+                    return;
+                }
+
+                var user = await _dbContext.TargetUsers
+                    .Where(u => !u.IsMessaged)
+                    .OrderBy(u => u.Id)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    Console.WriteLine("❌ No user to message.");
+                    return;
+                }
+
                 var userResult = await _instaApi.UserProcessor.GetUserAsync(user.Username);
                 if (!userResult.Succeeded)
                 {
-                    Console.WriteLine($"❌ Get Data is Failed: {user.Username}");
-                    continue;
+                    Console.WriteLine($"❌ Failed to fetch user data: {user.Username}");
+                    return;
                 }
 
                 var userId = userResult.Value.Pk.ToString();
-                // var message = "سلام دوست خوبم! خوشحال می‌شیم به فروشگاه ما سر بزنی ✨🛍️\nInstagram: @yourpage";
-                var message = "سلام دوست قشنگم!😍🎀\n" +
-                   "اومدیم یه چیز بامزه و رنگی بهت نشون بدیم! 😍\n" +
-                   "پر از لوازم تحریر خفن 😍، استیکرهای باحال ✨، دفترای خاص 📝 و کلی چیز جیگرررر! 🍭💥\n" +
-                   "اگه دنبال حس خوب و انرژی مثبتی، پیج ما دقیقاً همونجاست که باید باشی! 🧡\n" +
-                   "بیااااا کنارمون، با یه فالو کوچولو بهمون دلگرمی بده 💫\n" +
-                   "👈 منتظر دیدنت هستیم! 😇\n" +
-                   "📌@mazhi_chi";
 
-                var result = await _instaApi.MessagingProcessor.SendDirectTextAsync(userId,null, message);
+                var message = "سلام دوست قشنگم!😍🎀\n" +
+                              "اومدیم یه چیز بامزه و رنگی بهت نشون بدیم! 😍\n" +
+                              "پر از لوازم تحریر خفن 😍، استیکرهای باحال ✨، دفترای خاص 📝 و کلی چیز جیگرررر! 🍭💥\n" +
+                              "اگه دنبال حس خوب و انرژی مثبتی، پیج ما دقیقاً همونجاست که باید باشی! 🧡\n" +
+                              "بیااااا کنارمون، با یه فالو کوچولو بهمون دلگرمی بده 💫\n" +
+                              "👈 منتظر دیدنت هستیم! 😇\n" +
+                              "📌@mazhi_chi";
+
+                var result = await _instaApi.MessagingProcessor.SendDirectTextAsync(userId, null, message);
                 if (result.Succeeded)
                 {
                     user.IsMessaged = true;
                     user.MessagedAt = DateTime.Now;
-                    await _dbContext.SaveChangesAsync();
-                    sent++;
 
-                    Console.WriteLine($"✅  {user.Username} send to.");
-
-                    var delay = new Random().Next(120, 300); // تاخیر بین ۲ تا ۵ دقیقه
-                    await Task.Delay(TimeSpan.FromSeconds(delay));
+                    try
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        Console.WriteLine($"✅ Message sent to {user.Username}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"❗ Error saving {user.Username}: {ex.Message}");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"❌ ا,esaage send failed{user.Username}  .");
+                    Console.WriteLine($"❌ Failed to send message to {user.Username}");
                 }
             }
-
-            Console.WriteLine($"🎯Today send  ({sent}) message.");
+            finally
+            {
+                _lock.Release();
+            }
         }
-
     }
-
 }
