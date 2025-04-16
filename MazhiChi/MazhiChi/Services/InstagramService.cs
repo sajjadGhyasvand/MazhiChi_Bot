@@ -72,18 +72,21 @@ namespace MazhiChi.Services
                 var result = await _instaApi.MessagingProcessor.SendDirectTextAsync(userId, null, message);
                 if (result.Succeeded)
                 {
+                    // Attach user to the context to make sure it's tracked
+                    _dbContext.TargetUsers.Attach(user);
                     user.IsMessaged = true;
                     user.MessagedAt = DateTime.Now;
 
                     try
                     {
                         await _dbContext.SaveChangesAsync();
-                        Console.WriteLine($"✅ Message sent to {user.Username}");
+                        Console.WriteLine($"✅ {user.Username} updated in DB.");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"❗ Error saving {user.Username}: {ex.Message}");
+                        Console.WriteLine($"❗ DB update error for {user.Username}: {ex.Message}");
                     }
+
                 }
                 else
                 {
