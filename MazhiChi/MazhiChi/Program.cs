@@ -17,8 +17,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
 
 // چاپ Connection String و Base Directory جهت اطمینان از مقداردهی درست
 Console.WriteLine("🔌 Connection String: " + configuration.GetConnectionString("DefaultConnection"));
@@ -88,17 +92,22 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// تنظیم Jobهای Hangfire
 RecurringJob.AddOrUpdate<ScraperService>(
     "scrape-followers-daily",
     x => x.ScrapeFollowers("ranginkamon"),
-    "0 9 * * *"    // هر روز ساعت 9 صبح اجرا شود
+    "30 5 * * *"    // معادل ۹ صبح ایران
 );
 
 RecurringJob.AddOrUpdate<InstagramService>(
     "send-messages-every-30-minutes",
-    x => x.SendMessagesToUnmessagedUsersAsync(1),  // فقط یک پیام در هر 30 دقیقه
-    "*/30 * * * *"
+    x => x.SendMessagesToUnmessagedUsersAsync(1),
+    "*/30 * * * *"  // مشکلی نداره چون هر ۳۰ دقیقه‌ست
+);
+
+RecurringJob.AddOrUpdate(
+    "test-job",
+    () => Console.WriteLine($"📬 Test Job Run at: {DateTime.Now}"),
+    "20 3 * * *"  // معادل ۷:۵۰ صبح ایران
 );
 
 app.Run();

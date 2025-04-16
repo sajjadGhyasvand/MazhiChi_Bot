@@ -27,8 +27,11 @@ namespace MazhiChi.Services
 
         public async Task SendMessagesToUnmessagedUsersAsync(int dailyLimit)
         {
-            var now = DateTime.Now;
-            if (now.Hour < 8 || now.Hour >= 24)
+            var now = DateTime.UtcNow;
+            var iranStart = new TimeSpan(4, 30, 0);  // 08:00 IR
+            var iranEnd = new TimeSpan(20, 30, 0);   // 00:00 IR
+
+            if (now.TimeOfDay < iranStart || now.TimeOfDay > iranEnd)
             {
                 Console.WriteLine("⏸️ Out Of Context.");
                 await Task.Delay(TimeSpan.FromMinutes(30));
@@ -45,8 +48,10 @@ namespace MazhiChi.Services
 
             foreach (var user in usersToMessage)
             {
-                now = DateTime.Now;
-                if (now.Hour < 8 || now.Hour >= 24)
+                now = DateTime.UtcNow;
+                iranStart = new TimeSpan(4, 30, 0);  // 08:00 IR
+                iranEnd = new TimeSpan(20, 30, 0);   // 00:00 IR
+                if (now.TimeOfDay < iranStart || now.TimeOfDay > iranEnd)
                     break;
 
                 // دریافت اطلاعات کاربر برای گرفتن userId
